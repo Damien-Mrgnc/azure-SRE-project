@@ -72,3 +72,23 @@ resource "azurerm_role_assignment" "grafana_admin" {
   role_definition_name = "Grafana Admin"
   principal_id         = data.azurerm_client_config.current.object_id
 }
+
+# ---
+# 8. Grafana As Code (Idempotent Dashboards)
+# ---
+
+# Exécute Azure CLI pour déployer le Dashboard de manière idempotente (fonctionne en local & CI)
+resource "null_resource" "grafana_dashboard_webapp" {
+  triggers = {
+    dashboard_md5 = filemd5("${path.module}/dashboards/webapp-health.json")
+    grafana_id    = azurerm_dashboard_grafana.main.id
+  }
+
+  provisioner "local-exec" {
+    command = "az extension add -n amg --upgrade && az grafana dashboard create --name ${azurerm_dashboard_grafana.main.name} --resource-group ${azurerm_resource_group.main.name} --definition @${path.module}/dashboards/webapp-health.json --overwrite true"
+  }
+
+  depends_on = [
+    azurerm_role_assignment.grafana_admin
+  ]
+}

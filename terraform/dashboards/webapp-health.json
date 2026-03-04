@@ -1,0 +1,21 @@
+{
+    "title": "Application Health (SRE)",
+    "timezone": "browser",
+    "panels": [
+        {
+            "type": "text",
+            "title": "SRE Welcome Panel",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 24,
+                "h": 6
+            },
+            "options": {
+                "content": "# Bienvenue sur le Dashboard SRE\nCeci est un dashboard géré par Terraform (Idempotent).\nToute modification effectuée ici devrait être sauvegardée dans le code pour éviter d'être écrasée !"
+            }
+        }
+    ],
+    "schemaVersion": 36,
+    "version": 1
+}
