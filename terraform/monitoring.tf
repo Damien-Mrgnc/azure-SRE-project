@@ -46,6 +46,7 @@ resource "azurerm_dashboard_grafana" "main" {
   public_network_access_enabled     = true
   sku                               = "Standard"
   zone_redundancy_enabled           = false
+  grafana_major_version             = 10
 
   identity {
     type = "SystemAssigned"

@@ -4,7 +4,7 @@ on:
   push:
     branches: 
       - main
-      - 'feat/**' 
+      - 'phase-**'
     paths:
       - 'terraform/**'
       - '.github/workflows/infra-ci.yml'
@@ -116,7 +116,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform-plan
     environment: production
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/phase-')) && github.event_name == 'push'
     permissions:
       contents: read
       id-token: write
