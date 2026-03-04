@@ -5,6 +5,28 @@ const logger = require('./config/logger');
 const { requireAuth, requireAdmin } = require('./middleware/auth');
 const configService = require('./services/configService');
 
+// Prometheus setup
+const promClient = require('prom-client');
+const responseTime = require('response-time');
+
+const register = new promClient.Registry();
+promClient.collectDefaultMetrics({ register });
+
+const reqResTime = new promClient.Histogram({
+    name: 'http_request_duration_ms',
+    help: 'Duration of HTTP requests in ms',
+    labelNames: ['method', 'route', 'code'],
+    buckets: [10, 50, 100, 200, 500, 1000, 2000, 5000]
+});
+register.registerMetric(reqResTime);
+
+const requestsTotal = new promClient.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests',
+    labelNames: ['method', 'route', 'code']
+});
+register.registerMetric(requestsTotal);
+
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -15,6 +37,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Middleware
 app.use(express.json());
+
+// SRE Metrics Middleware
+app.use(responseTime((req, res, time) => {
+    // Ne pas tracer la route des métriques elle-même
+    if (req?.route?.path === '/metrics') return;
+
+    const route = req.route ? req.route.path : req.path;
+    
+    reqResTime.labels(req.method, route, res.statusCode).observe(time);
+    requestsTotal.labels(req.method, route, res.statusCode).inc();
+}));
 
 // CORS Configuration - Restrict access in production
 if (process.env.NODE_ENV === 'production') {
@@ -28,6 +61,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Public API Routes (Public config)
+// Prometheus metrics route
+app.get('/metrics', async (req, res) => {
+    res.setHeader('Content-Type', register.contentType);
+    res.send(await register.metrics());
+});
+
 // GET /api/config -> Returns current state
 app.get('/api/config', async (req, res) => {
     try {

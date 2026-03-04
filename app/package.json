@@ -19,7 +19,9 @@
         "cors": "^2.8.5",
         "ejs": "^3.1.9",
         "express": "^4.18.2",
+        "prom-client": "^15.1.0",
         "redis": "^4.6.13",
+        "response-time": "^2.3.2",
         "tedious": "^19.2.1",
         "winston": "^3.11.0",
         "zod": "^3.22.4"

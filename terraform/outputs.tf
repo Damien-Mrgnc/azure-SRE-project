@@ -44,3 +44,8 @@ output "sql_admin_password_secret_id" {
   description = "ID of the Key Vault Secret containing the SQL password"
   value       = azurerm_key_vault_secret.sql_password.id
 }
+
+output "grafana_url" {
+  description = "URL of the Azure Managed Grafana Dashboard"
+  value       = azurerm_dashboard_grafana.main.endpoint
+}
