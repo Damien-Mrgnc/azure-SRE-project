@@ -11,8 +11,8 @@ resource "azurerm_redis_cache" "main" {
   family   = "C"
   sku_name = "Basic"
 
-  enable_non_ssl_port = false
-  minimum_tls_version = "1.2"
+  non_ssl_port_enabled = false
+  minimum_tls_version  = "1.2"
 
   redis_configuration {
     maxmemory_reserved = 2

@@ -12,7 +12,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.90.0" # Fixe la version du provider (evite les updates cassees)
+      version = "~> 4.0" # Version > 4.0 pour supporter Grafana 11
     }
     random = {
       source  = "hashicorp/random"
