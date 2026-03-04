@@ -1,4 +1,4 @@
-# Infra CI workflow
+# InfraCI workflow
 
 name: Infra CI
 on:

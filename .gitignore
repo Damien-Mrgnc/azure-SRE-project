@@ -44,4 +44,5 @@ data/
 prometheus_data/
 
 # Fichiers Projet (commenté car PLAN.md est supposé être versionné)
-# PLAN.md
+PLAN.md
+.antigravityrules
