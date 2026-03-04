@@ -1,5 +1,6 @@
-name: Infra CI
+# Infra CI workflow
 
+name: Infra CI
 on:
   push:
     branches: 
