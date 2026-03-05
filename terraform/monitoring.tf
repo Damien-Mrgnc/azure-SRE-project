@@ -23,72 +23,86 @@ resource "azurerm_application_insights" "main" {
 }
 
 # ---
-# 7. SRE Observability (Azure Monitor Managed Service & Managed Grafana)
+# 7. SRE Observability - Grafana sur App Service (gratuit / pas cher)
+# ❌ SUPPRIMÉ : azurerm_dashboard_grafana (~100€/mois)
+# ❌ SUPPRIMÉ : azurerm_monitor_workspace (coûteux)
+# ✅ REMPLACÉ : Grafana via image Docker sur le même App Service Plan (B1)
 # ---
 
-# Espace de travail Azure Monitor (nécessaire pour stocker les métriques Prometheus si utilisées, 
-# et s'intègre nativement à Managed Grafana)
-resource "azurerm_monitor_workspace" "main" {
-  name                = "amw-${var.project_name}-${random_id.server_suffix.hex}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
+resource "azurerm_linux_web_app" "grafana" {
+  name                    = "grafana-${var.project_name}-${random_id.server_suffix.hex}"
+  resource_group_name     = azurerm_resource_group.main.name
+  location                = azurerm_service_plan.main.location
+  service_plan_id         = azurerm_service_plan.main.id # Partage le plan App Service existant (pas de surcoût)
+  https_only              = true
+  client_affinity_enabled = false
+
+  # checkov:skip=CKV_AZURE_13: "Auth simplifiée pour lab"
+  # checkov:skip=CKV_AZURE_222: "Private Endpoints trop chers pour lab"
+  # checkov:skip=CKV_AZURE_113: "Accès public requis pour Grafana lab"
+  # checkov:skip=CKV_AZURE_88: "Pas de storage account monté"
+  # checkov:skip=CKV_AZURE_17: "Client affinity non nécessaire"
+  # checkov:skip=CKV_AZURE_65: "Restrictions d'accès ignorées pour lab"
+  # checkov:skip=CKV_AZURE_71: "Managed identity non utilisée ici"
+  # checkov:skip=CKV_AZURE_78: "Client certs non requis"
+
+  site_config {
+    application_stack {
+      docker_image_name   = "grafana/grafana:latest"
+      docker_registry_url = "https://index.docker.io"
+    }
+
+    always_on           = true
+    ftps_state          = "Disabled"
+    http2_enabled       = true
+    minimum_tls_version = "1.2"
+    health_check_path   = "/api/health"
+
+    ip_restriction {
+      name       = "AllowAny"
+      priority   = 100
+      action     = "Allow"
+      ip_address = "0.0.0.0/0"
+    }
+  }
+
+  app_settings = {
+    # Port exposé par Grafana (Docker)
+    "WEBSITES_PORT" = "3000"
+
+    # Sécurité admin
+    "GF_SECURITY_ADMIN_USER"     = "admin"
+    "GF_SECURITY_ADMIN_PASSWORD" = random_password.grafana_admin.result
+
+    # URL publique (corrige les redirections)
+    "GF_SERVER_ROOT_URL" = "https://grafana-${var.project_name}-${random_id.server_suffix.hex}.azurewebsites.net"
+
+    # Datasource Azure Monitor pointer vers Log Analytics
+    "GF_PLUGINS_PREINSTALL" = "grafana-azure-monitor-datasource"
+
+    # Désactiver les analytics Grafana
+    "GF_ANALYTICS_REPORTING_ENABLED"        = "false"
+    "GF_ANALYTICS_CHECK_FOR_UPDATES"        = "false"
+    "GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES" = "false"
+  }
 
   tags = local.tags
 }
 
-# Azure Managed Grafana
-resource "azurerm_dashboard_grafana" "main" {
-  name                              = "grf-${random_id.server_suffix.hex}"
-  location                          = azurerm_resource_group.main.location
-  resource_group_name               = azurerm_resource_group.main.name
-  api_key_enabled                   = true
-  deterministic_outbound_ip_enabled = false
-  public_network_access_enabled     = true
-  sku                               = "Standard"
-  zone_redundancy_enabled           = false
-  grafana_major_version             = 11
+# Mot de passe aléatoire pour l'admin Grafana
+resource "random_password" "grafana_admin" {
+  length           = 20
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
 
-  identity {
-    type = "SystemAssigned"
-  }
-
-  azure_monitor_workspace_integrations {
-    resource_id = azurerm_monitor_workspace.main.id
-  }
+# Stocker le mot de passe Grafana dans Key Vault pour ne pas le perdre
+resource "azurerm_key_vault_secret" "grafana_admin_password" {
+  name            = "grafana-admin-password"
+  value           = random_password.grafana_admin.result
+  key_vault_id    = azurerm_key_vault.main.id
+  content_type    = "text/plain"
+  expiration_date = "2026-12-31T00:00:00Z"
 
   tags = local.tags
-}
-
-# Autoriser Grafana à lire les données Azure Monitor (Metrics / App Insights / Log Analytics)
-resource "azurerm_role_assignment" "grafana_monitoring_reader" {
-  scope                = azurerm_resource_group.main.id
-  role_definition_name = "Monitoring Reader"
-  principal_id         = azurerm_dashboard_grafana.main.identity[0].principal_id
-}
-
-# Accorder les droits d'administrateur Grafana à l'utilisateur lançant le script (toi/la CI)
-resource "azurerm_role_assignment" "grafana_admin" {
-  scope                = azurerm_dashboard_grafana.main.id
-  role_definition_name = "Grafana Admin"
-  principal_id         = data.azurerm_client_config.current.object_id
-}
-
-# ---
-# 8. Grafana As Code (Idempotent Dashboards)
-# ---
-
-# Exécute Azure CLI pour déployer le Dashboard de manière idempotente (fonctionne en local & CI)
-resource "null_resource" "grafana_dashboard_webapp" {
-  triggers = {
-    dashboard_md5 = filemd5("${path.module}/dashboards/webapp-health.json")
-    grafana_id    = azurerm_dashboard_grafana.main.id
-  }
-
-  provisioner "local-exec" {
-    command = "az extension add -n amg --upgrade && az grafana dashboard create --name ${azurerm_dashboard_grafana.main.name} --resource-group ${azurerm_resource_group.main.name} --definition @${path.module}/dashboards/webapp-health.json --overwrite true"
-  }
-
-  depends_on = [
-    azurerm_role_assignment.grafana_admin
-  ]
 }

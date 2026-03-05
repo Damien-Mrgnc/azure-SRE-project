@@ -12,8 +12,8 @@ This project is deeply documented and structured logically into progressive phas
 ### [Phase 0: Initialization and Preparation](./phase-0-initialisation/README.md)
 Initialization of the SRE repository, setup and verification of the existing CI/CD (DevSecOps) and the OIDC connection with Azure. Preparing the groundwork for SRE components.
 
-### Phase 1: Observability (Monitoring & Metrics)
-*Upcoming section: Application instrumentation, deployment of a monitoring system (Prometheus / Azure Monitor), and creation of Grafana dashboards.*
+### [Phase 1: Observability (Monitoring & Metrics)](./phase-1-monitoring/README.md)
+Application instrumentation with Prometheus (`prom-client`), deployment of the Azure monitoring stack (Log Analytics, Application Insights, Monitor Workspace, Managed Grafana v11), and creation of SRE dashboards based on the 4 Golden Signals.
 
 ### Phase 2: Logs and Distributed Tracing
 *Upcoming section: Centralization of application and infrastructure logs, and implementation of distributed tracing (OpenTelemetry / Application Insights).*

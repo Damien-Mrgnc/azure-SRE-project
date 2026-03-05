@@ -46,6 +46,11 @@ output "sql_admin_password_secret_id" {
 }
 
 output "grafana_url" {
-  description = "URL of the Azure Managed Grafana Dashboard"
-  value       = azurerm_dashboard_grafana.main.endpoint
+  description = "URL of the Grafana instance (hosted on App Service - cost-effective alternative to Azure Managed Grafana)"
+  value       = "https://${azurerm_linux_web_app.grafana.default_hostname}"
+}
+
+output "grafana_admin_password_secret" {
+  description = "Key Vault secret name containing the Grafana admin password"
+  value       = azurerm_key_vault_secret.grafana_admin_password.name
 }

@@ -8,7 +8,7 @@ COPY package*.json ./
 
 # ---- Dependencies ----
 FROM base AS dependencies
-# Installer dépendances production
+# Installer dépendances production--
 # Force l'utilisation du package-lock.json à jour qui contient les correctifs
 RUN npm install --omit=dev
 COPY prisma ./prisma/
