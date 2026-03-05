@@ -149,7 +149,7 @@ jobs:
       # ---------------------------------------------------------------
       # Fix permanent : importer les secrets KV s'ils existent déjà dans Azure
       # mais pas dans l'état Terraform (évite l'erreur "already exists").
-      # Le '|| true' ignore l'erreur si le secret n'existe pas encore (1er déploiement).
+      # Utilise Azure CLI pour trouver le KV (plus fiable que terraform output).
       # ---------------------------------------------------------------
       - name: Import existing Key Vault secrets (idempotent)
         env:
@@ -158,19 +158,27 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
         run: |
-          # Récupérer le nom du Key Vault depuis le state Terraform
-          KV_NAME=$(terraform output -raw key_vault_name 2>/dev/null || echo "")
+          set -x  # Mode debug : affiche chaque commande dans les logs
+
+          # Azure CLI : cherche le KV dans le subscription (ne dépend pas du state Terraform)
+          KV_NAME=$(az keyvault list \
+            --query "[?starts_with(name, 'kv-projet1')].name | [0]" \
+            -o tsv 2>/dev/null || true)
+
+          echo ">>> Key Vault détecté : '${KV_NAME}'"
 
           if [ -n "$KV_NAME" ]; then
-            echo "Key Vault trouvé : $KV_NAME — tentative d'import des secrets existants..."
             BASE_URL="https://${KV_NAME}.vault.azure.net/secrets"
+            echo ">>> Import des secrets depuis : $BASE_URL"
 
-            terraform import azurerm_key_vault_secret.sql_password         "${BASE_URL}/sql-admin-password"       || true
-            terraform import azurerm_key_vault_secret.sql_connection_string "${BASE_URL}/sql-connection-string"   || true
-            terraform import azurerm_key_vault_secret.redis_connection_string "${BASE_URL}/redis-connection-string" || true
-            terraform import azurerm_key_vault_secret.grafana_admin_password "${BASE_URL}/grafana-admin-password"  || true
+            terraform import azurerm_key_vault_secret.sql_password           "${BASE_URL}/sql-admin-password"        2>&1 || true
+            terraform import azurerm_key_vault_secret.sql_connection_string   "${BASE_URL}/sql-connection-string"    2>&1 || true
+            terraform import azurerm_key_vault_secret.redis_connection_string  "${BASE_URL}/redis-connection-string" 2>&1 || true
+            terraform import azurerm_key_vault_secret.grafana_admin_password   "${BASE_URL}/grafana-admin-password"  2>&1 || true
+
+            echo ">>> Import terminé (les 'already exists' ci-dessus sont normaux si déjà en state)"
           else
-            echo "Aucun Key Vault dans le state (premier déploiement) — import ignoré."
+            echo ">>> Aucun KV trouvé — premier déploiement, import ignoré."
           fi
 
       - name: Terraform Apply
