@@ -145,6 +145,34 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
         run: terraform init
+
+      # ---------------------------------------------------------------
+      # Fix permanent : importer les secrets KV s'ils existent déjà dans Azure
+      # mais pas dans l'état Terraform (évite l'erreur "already exists").
+      # Le '|| true' ignore l'erreur si le secret n'existe pas encore (1er déploiement).
+      # ---------------------------------------------------------------
+      - name: Import existing Key Vault secrets (idempotent)
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_OIDC: true
+        run: |
+          # Récupérer le nom du Key Vault depuis le state Terraform
+          KV_NAME=$(terraform output -raw key_vault_name 2>/dev/null || echo "")
+
+          if [ -n "$KV_NAME" ]; then
+            echo "Key Vault trouvé : $KV_NAME — tentative d'import des secrets existants..."
+            BASE_URL="https://${KV_NAME}.vault.azure.net/secrets"
+
+            terraform import azurerm_key_vault_secret.sql_password         "${BASE_URL}/sql-admin-password"       || true
+            terraform import azurerm_key_vault_secret.sql_connection_string "${BASE_URL}/sql-connection-string"   || true
+            terraform import azurerm_key_vault_secret.redis_connection_string "${BASE_URL}/redis-connection-string" || true
+            terraform import azurerm_key_vault_secret.grafana_admin_password "${BASE_URL}/grafana-admin-password"  || true
+          else
+            echo "Aucun Key Vault dans le state (premier déploiement) — import ignoré."
+          fi
+
       - name: Terraform Apply
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -152,3 +180,4 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
         run: terraform apply -auto-approve -lock=false
+
