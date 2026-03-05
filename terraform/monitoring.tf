@@ -22,13 +22,6 @@ resource "azurerm_application_insights" "main" {
   tags = local.tags
 }
 
-# ---
-# 7. SRE Observability - Grafana sur App Service (gratuit / pas cher)
-# ❌ SUPPRIMÉ : azurerm_dashboard_grafana (~100€/mois)
-# ❌ SUPPRIMÉ : azurerm_monitor_workspace (coûteux)
-# ✅ REMPLACÉ : Grafana via image Docker sur le même App Service Plan (B1)
-# ---
-
 resource "azurerm_linux_web_app" "grafana" {
   name                    = "grafana-${var.project_name}-${random_id.server_suffix.hex}"
   resource_group_name     = azurerm_resource_group.main.name
@@ -106,4 +99,44 @@ resource "azurerm_key_vault_secret" "grafana_admin_password" {
   expiration_date = "2026-12-31T00:00:00Z"
 
   tags = local.tags
+}
+
+resource "null_resource" "grafana_dashboard_webapp" {
+  # Re-déployer le dashboard si le JSON change OU si l'App Service Grafana change
+  triggers = {
+    dashboard_md5 = filemd5("${path.module}/dashboards/webapp-health.json")
+    grafana_id    = azurerm_linux_web_app.grafana.id
+  }
+
+  provisioner "local-exec" {
+    # Attendre que Grafana soit prêt (jusqu'à 3 min), puis pousser le dashboard via son API REST
+    command = <<-EOT
+      echo "Attente du démarrage de Grafana..."
+      for i in $(seq 1 18); do
+        STATUS=$(curl -s -o /dev/null -w "%%{http_code}" https://${azurerm_linux_web_app.grafana.default_hostname}/api/health)
+        if [ "$STATUS" = "200" ]; then
+          echo "Grafana est prêt (tentative $i)"
+          break
+        fi
+        echo "Tentative $i/18 - Statut HTTP: $STATUS - attente 10s..."
+        sleep 10
+      done
+
+      echo "Déploiement du dashboard..."
+      curl -sf \
+        -X POST \
+        -H "Content-Type: application/json" \
+        -u "admin:${random_password.grafana_admin.result}" \
+        -d "{\"dashboard\": $(cat ${path.module}/dashboards/webapp-health.json), \"overwrite\": true, \"folderId\": 0}" \
+        https://${azurerm_linux_web_app.grafana.default_hostname}/api/dashboards/db
+      echo "Dashboard déployé avec succès !"
+    EOT
+
+    interpreter = ["bash", "-c"]
+  }
+
+  depends_on = [
+    azurerm_linux_web_app.grafana,
+    azurerm_key_vault_secret.grafana_admin_password
+  ]
 }

@@ -27,8 +27,10 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false # Facilite le 'terraform destroy' pour les labs
     }
     key_vault {
-      purge_soft_delete_on_destroy    = true # Detruit reellement le KV (evite le conflit de nom si tu rejoues)
-      recover_soft_deleted_key_vaults = true
+      purge_soft_delete_on_destroy          = true # Purge le KV à la destruction
+      recover_soft_deleted_key_vaults       = true # Récupère le KV s'il est soft-deleted
+      recover_soft_deleted_secrets          = true # ✅ Clé du fix : récupère les secrets soft-deleted au lieu de crasher
+      purge_soft_deleted_secrets_on_destroy = true # Purge les secrets à la destruction (ne laisse rien traîner)
     }
   }
 }

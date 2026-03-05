@@ -13,7 +13,8 @@ resource "azurerm_key_vault" "main" {
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_retention_days  = 7
-  purge_protection_enabled    = true # Sécurité : Interdire les purges hâtives
+  purge_protection_enabled    = false # ✅ Désactivé pour lab : permet à Terraform de purger les secrets au destroy
+  # ⚠️  En PROD, remettre à true pour protéger les secrets contre la suppression accidentelle
 
   sku_name = "standard"
 
