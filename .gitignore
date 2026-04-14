@@ -4,6 +4,7 @@
 *.tfstate.*
 crash.log
 *.tfvars
+.terraform.tfstate.lock.info
 
 # Ignorer les guides et la documentation interne
 guides/
@@ -20,14 +21,28 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment Variables
+# Python (si utilisé plus tard)
+__pycache__/
+build/
+
+# Environment Variables & Secrets
 .env
 .env.*
 !.env.example
+*.pem
+secrets/
 
-# Local Deployment & IDEs
+# IDEs
 .vscode/
 .idea/
+*.swp
 *.local
+
+# SRE & Local Docker
 docker-compose.yml
+data/
+prometheus_data/
+
+# Fichiers Projet (commenté car PLAN.md est supposé être versionné)
 PLAN.md
+.antigravityrules

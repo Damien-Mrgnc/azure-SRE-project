@@ -44,12 +44,13 @@ resource "azurerm_linux_web_app" "main" {
       docker_registry_url = "https://${azurerm_container_registry.main.login_server}"
 
     }
-    app_command_line    = ""
-    always_on           = true # Recommended for B1.
-    ftps_state          = "Disabled"
-    http2_enabled       = true
-    minimum_tls_version = "1.2"
-    health_check_path   = "/"
+    app_command_line                  = ""
+    always_on                         = true # Recommended for B1.
+    ftps_state                        = "Disabled"
+    http2_enabled                     = true
+    minimum_tls_version               = "1.2"
+    health_check_path                 = "/"
+    health_check_eviction_time_in_min = 2
 
     ip_restriction {
       name       = "AllowAny"
@@ -79,9 +80,6 @@ resource "azurerm_linux_web_app" "main" {
     "WEBSITES_PORT" = "8080"
     "PORT"          = "8080"
     "NODE_ENV"      = "production"
-
-    # ACR Credentials (Identity Based - Requires AcrPull Role Assigned to SystemIdentity)
-    "DOCKER_REGISTRY_SERVER_URL" = "https://${azurerm_container_registry.main.login_server}"
 
     "APPINSIGHTS_INSTRUMENTATIONKEY"        = azurerm_application_insights.main.instrumentation_key
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.main.connection_string

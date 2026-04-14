@@ -50,4 +50,10 @@ variable "alert_email" {
   type        = string
 }
 
+variable "autoscale_max_instances" {
+  description = "Maximum number of App Service instances for autoscaling (requires S1+ SKU)"
+  type        = number
+  default     = 3
+}
+
 

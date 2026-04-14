@@ -44,3 +44,13 @@ output "sql_admin_password_secret_id" {
   description = "ID of the Key Vault Secret containing the SQL password"
   value       = azurerm_key_vault_secret.sql_password.id
 }
+
+output "grafana_url" {
+  description = "URL of the Grafana instance (hosted on App Service - cost-effective alternative to Azure Managed Grafana)"
+  value       = "https://${azurerm_linux_web_app.grafana.default_hostname}"
+}
+
+output "grafana_admin_password_secret" {
+  description = "Key Vault secret name containing the Grafana admin password"
+  value       = azurerm_key_vault_secret.grafana_admin_password.name
+}

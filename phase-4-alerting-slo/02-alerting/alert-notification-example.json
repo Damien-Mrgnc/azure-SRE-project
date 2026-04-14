@@ -1,0 +1,165 @@
+{
+  "_meta": {
+    "description": "Exemples de notifications d'alertes Azure Monitor reçues par email (Common Alert Schema).",
+    "schema": "Azure Monitor Common Alert Schema v1.0",
+    "date_simulated": "2026-04-13"
+  },
+
+  "notifications": [
+    {
+      "_scenario": "SLO Disponibilité — Breach",
+      "schemaId": "azureMonitorCommonAlertSchema",
+      "data": {
+        "essentials": {
+          "alertId": "/subscriptions/0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2/providers/Microsoft.AlertsManagement/alerts/a1b2c3d4",
+          "alertRule": "slo-availability-breach",
+          "severity": "Sev1",
+          "signalType": "Log",
+          "monitorCondition": "Fired",
+          "monitoringService": "Log Alerts V2",
+          "alertTargetIDs": [
+            "/subscriptions/0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2/resourceGroups/rg-projet3-sre/providers/Microsoft.OperationalInsights/workspaces/law-projet3-sre-abc123"
+          ],
+          "configurationItems": ["law-projet3-sre-abc123"],
+          "originAlertId": "slo-availability-breach",
+          "firedDateTime": "2026-04-13T09:30:15Z",
+          "description": "SLO Breach: HTTP 5xx error rate exceeded 1% — availability SLO at risk.",
+          "essentialsVersion": "1.0",
+          "alertContextVersion": "1.0"
+        },
+        "alertContext": {
+          "properties": {
+            "slo": "Availability",
+            "threshold": "99.9%"
+          },
+          "conditionType": "LogQueryCriteria",
+          "condition": {
+            "windowSize": "PT5M",
+            "allOf": [
+              {
+                "searchQuery": "AppServiceHTTPLogs | where TimeGenerated > ago(5m) | summarize total = count(), errors5xx = countif(ScStatus >= 500) | extend error_rate_pct = (toreal(errors5xx) / toreal(total)) * 100 | where error_rate_pct > 1.0",
+                "metricMeasureColumn": null,
+                "targetResourceTypes": "['Microsoft.OperationalInsights/workspaces']",
+                "operator": "GreaterThan",
+                "threshold": "0",
+                "timeAggregation": "Count",
+                "dimensions": [],
+                "metricValue": 1,
+                "failingPeriods": {
+                  "numberOfEvaluationPeriods": 1,
+                  "minFailingPeriodsToAlert": 1
+                },
+                "linkToSearchResultsUI": "https://portal.azure.com#blade/...",
+                "linkToFilteredSearchResultsUI": "https://portal.azure.com#blade/..."
+              }
+            ],
+            "windowStartTime": "2026-04-13T09:25:00Z",
+            "windowEndTime": "2026-04-13T09:30:00Z"
+          }
+        }
+      },
+      "_email_subject": "[FIRED][Sev1] slo-availability-breach — rg-projet3-sre",
+      "_human_summary": "Le taux d'erreurs HTTP 5xx a dépassé 1% sur la fenêtre 09:25-09:30. Error budget disponibilité en danger. Consulter Log Analytics pour identifier la cause."
+    },
+
+    {
+      "_scenario": "SLO Latence — Warning",
+      "schemaId": "azureMonitorCommonAlertSchema",
+      "data": {
+        "essentials": {
+          "alertId": "/subscriptions/0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2/providers/Microsoft.AlertsManagement/alerts/b2c3d4e5",
+          "alertRule": "slo-latency-breach",
+          "severity": "Sev2",
+          "signalType": "Log",
+          "monitorCondition": "Fired",
+          "firedDateTime": "2026-04-13T10:45:30Z",
+          "description": "SLO Breach: Average response time exceeded 800ms — latency SLO at risk."
+        },
+        "alertContext": {
+          "properties": {
+            "slo": "Latency",
+            "threshold": "p99 < 1000ms"
+          },
+          "condition": {
+            "windowSize": "PT10M",
+            "allOf": [
+              {
+                "searchQuery": "AppServiceHTTPLogs | where TimeGenerated > ago(10m) | summarize p99 = percentile(TimeTaken, 99) | where p99 > 800",
+                "metricValue": 1,
+                "windowStartTime": "2026-04-13T10:35:00Z",
+                "windowEndTime": "2026-04-13T10:45:00Z"
+              }
+            ]
+          }
+        }
+      },
+      "_email_subject": "[FIRED][Sev2] slo-latency-breach — rg-projet3-sre",
+      "_human_summary": "Le p99 de latence a dépassé 800ms sur 10 minutes. Vérifier si autoscaling est au maximum d'instances, ou si une requête SQL lente est en cause (croiser avec traces Application Insights)."
+    },
+
+    {
+      "_scenario": "CPU élevé — Infrastructure Alert (Phase 1)",
+      "schemaId": "azureMonitorCommonAlertSchema",
+      "data": {
+        "essentials": {
+          "alertId": "/subscriptions/0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2/providers/Microsoft.AlertsManagement/alerts/c3d4e5f6",
+          "alertRule": "alert-asp-cpu-high",
+          "severity": "Sev2",
+          "signalType": "Metric",
+          "monitorCondition": "Fired",
+          "firedDateTime": "2026-04-13T07:12:00Z",
+          "description": "Action will be triggered when CPU percentage is greater than 80."
+        },
+        "alertContext": {
+          "conditionType": "SingleResourceMultipleMetricCriteria",
+          "condition": {
+            "windowSize": "PT5M",
+            "allOf": [
+              {
+                "metricName": "CpuPercentage",
+                "metricNamespace": "Microsoft.Web/serverfarms",
+                "operator": "GreaterThan",
+                "threshold": "80",
+                "timeAggregation": "Average",
+                "metricValue": 82.4,
+                "webTestName": null
+              }
+            ]
+          }
+        }
+      },
+      "_email_subject": "[FIRED][Sev2] alert-asp-cpu-high — asp-projet3-sre-lab",
+      "_human_summary": "CPU moyen à 82.4% sur l'App Service Plan. L'autoscaling Phase 3 devrait avoir déjà ajouté des instances. Si toujours à max instances → incident potentiel."
+    },
+
+    {
+      "_scenario": "Résolution automatique d'une alerte",
+      "schemaId": "azureMonitorCommonAlertSchema",
+      "data": {
+        "essentials": {
+          "alertId": "/subscriptions/0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2/providers/Microsoft.AlertsManagement/alerts/c3d4e5f6",
+          "alertRule": "alert-asp-cpu-high",
+          "severity": "Sev2",
+          "signalType": "Metric",
+          "monitorCondition": "Resolved",
+          "firedDateTime": "2026-04-13T07:12:00Z",
+          "resolvedDateTime": "2026-04-13T07:26:00Z",
+          "description": "CPU alert resolved — metric returned below threshold."
+        },
+        "alertContext": {
+          "condition": {
+            "allOf": [
+              {
+                "metricName": "CpuPercentage",
+                "metricValue": 52.1,
+                "threshold": "80"
+              }
+            ]
+          }
+        }
+      },
+      "_email_subject": "[RESOLVED] alert-asp-cpu-high — asp-projet3-sre-lab",
+      "_human_summary": "Alerte CPU résolue automatiquement après 14 minutes. CPU redescendu à 52.1% (autoscaling scale-out a absorbé la charge)."
+    }
+  ]
+}

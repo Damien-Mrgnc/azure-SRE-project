@@ -1,0 +1,9 @@
+﻿{
+  "name": "github-production-env",
+  "issuer": "https://token.actions.githubusercontent.com",
+  "subject": "repo:Damien-Mrgnc/azure-SRE-project:environment:production",
+  "description": "Autorisation OIDC pour le deploiement en production depuis GitHub Actions",
+  "audiences": [
+    "api://AzureADTokenExchange"
+  ]
+}

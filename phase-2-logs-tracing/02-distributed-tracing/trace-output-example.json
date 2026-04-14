@@ -1,0 +1,178 @@
+{
+  "_comment": "Exemple de traces exportées vers Azure Application Insights via OpenTelemetry.",
+  "_description": "Chaque requête HTTP génère un 'span' parent (HTTP GET /api/config) et des spans enfants (Redis, SQL). Le traceId commun permet de reconstituer le chemin complet d'une requête.",
+  "_timestamp": "2026-04-13T09:58:42Z",
+
+  "traces": [
+    {
+      "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "spans": [
+        {
+          "spanId": "00f067aa0ba902b7",
+          "parentSpanId": null,
+          "operationName": "GET /api/config",
+          "kind": "SERVER",
+          "startTime": "2026-04-13T09:58:42.095Z",
+          "endTime": "2026-04-13T09:58:42.123Z",
+          "durationMs": 28,
+          "status": "OK",
+          "attributes": {
+            "http.method": "GET",
+            "http.url": "https://app-projet3-sre.azurewebsites.net/api/config",
+            "http.status_code": 200,
+            "http.route": "/api/config",
+            "net.peer.ip": "90.50.12.34",
+            "service.name": "runtime-governance-app",
+            "service.version": "1.0.0",
+            "x-correlation-id": "c4f2a891-3b1d-4e7f-9a23-7d8e1f2b3c4a"
+          }
+        },
+        {
+          "spanId": "a2fb4a1d1a96d312",
+          "parentSpanId": "00f067aa0ba902b7",
+          "operationName": "redis.get appConfig",
+          "kind": "CLIENT",
+          "startTime": "2026-04-13T09:58:42.098Z",
+          "endTime": "2026-04-13T09:58:42.103Z",
+          "durationMs": 5,
+          "status": "OK",
+          "attributes": {
+            "db.system": "redis",
+            "db.statement": "GET appConfig",
+            "net.peer.name": "redis-projet3-sre.redis.cache.windows.net",
+            "net.peer.port": 6380
+          }
+        }
+      ],
+      "_note": "Cache Redis HIT — pas de requête SQL générée, durée totale 28ms"
+    },
+    {
+      "traceId": "7b92f3577b34da6a3ce929d0e0e4738",
+      "spans": [
+        {
+          "spanId": "10f067aa0ba902c1",
+          "parentSpanId": null,
+          "operationName": "POST /api/admin/config",
+          "kind": "SERVER",
+          "startTime": "2026-04-13T09:55:03.870Z",
+          "endTime": "2026-04-13T09:55:04.020Z",
+          "durationMs": 150,
+          "status": "OK",
+          "attributes": {
+            "http.method": "POST",
+            "http.url": "https://app-projet3-sre.azurewebsites.net/api/admin/config",
+            "http.status_code": 200,
+            "http.route": "/api/admin/config",
+            "service.name": "runtime-governance-app",
+            "x-correlation-id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          }
+        },
+        {
+          "spanId": "b3fb4a1d1a96d415",
+          "parentSpanId": "10f067aa0ba902c1",
+          "operationName": "prisma:query AppConfig.findMany",
+          "kind": "CLIENT",
+          "startTime": "2026-04-13T09:55:03.880Z",
+          "endTime": "2026-04-13T09:55:03.905Z",
+          "durationMs": 25,
+          "status": "OK",
+          "attributes": {
+            "db.system": "mssql",
+            "db.name": "sqldb-projet3-sre",
+            "db.operation": "findMany",
+            "db.sql.table": "AppConfig"
+          }
+        },
+        {
+          "spanId": "c4gb5b2e2b07e526",
+          "parentSpanId": "10f067aa0ba902c1",
+          "operationName": "prisma:query AppConfig.upsert + AppConfigAudit.create ($transaction)",
+          "kind": "CLIENT",
+          "startTime": "2026-04-13T09:55:03.907Z",
+          "endTime": "2026-04-13T09:55:03.995Z",
+          "durationMs": 88,
+          "status": "OK",
+          "attributes": {
+            "db.system": "mssql",
+            "db.name": "sqldb-projet3-sre",
+            "db.operation": "$transaction",
+            "db.sql.table": "AppConfig, AppConfigAudit"
+          }
+        },
+        {
+          "spanId": "d5hc6c3f3c18f637",
+          "parentSpanId": "10f067aa0ba902c1",
+          "operationName": "redis.del appConfig",
+          "kind": "CLIENT",
+          "startTime": "2026-04-13T09:55:04.001Z",
+          "endTime": "2026-04-13T09:55:04.008Z",
+          "durationMs": 7,
+          "status": "OK",
+          "attributes": {
+            "db.system": "redis",
+            "db.statement": "DEL appConfig",
+            "net.peer.name": "redis-projet3-sre.redis.cache.windows.net"
+          }
+        }
+      ],
+      "_note": "Cache Redis MISS → SQL findMany (25ms) → $transaction SQL (88ms) → DEL Redis. Total: 150ms"
+    },
+    {
+      "traceId": "9d04b532894ec6f0a2fb4a1d1a96d312",
+      "spans": [
+        {
+          "spanId": "20a178bb0cb013d8",
+          "parentSpanId": null,
+          "operationName": "GET /api/config",
+          "kind": "SERVER",
+          "startTime": "2026-04-13T09:30:11.000Z",
+          "endTime": "2026-04-13T09:30:11.750Z",
+          "durationMs": 750,
+          "status": "ERROR",
+          "attributes": {
+            "http.method": "GET",
+            "http.status_code": 500,
+            "http.route": "/api/config",
+            "service.name": "runtime-governance-app",
+            "error": true,
+            "exception.type": "PrismaClientKnownRequestError",
+            "exception.message": "Can't reach database server at sqldb-projet3-sre.database.windows.net:1433"
+          }
+        },
+        {
+          "spanId": "31b289cc1dc124e9",
+          "parentSpanId": "20a178bb0cb013d8",
+          "operationName": "redis.get appConfig",
+          "kind": "CLIENT",
+          "startTime": "2026-04-13T09:30:11.005Z",
+          "endTime": "2026-04-13T09:30:11.010Z",
+          "durationMs": 5,
+          "status": "OK",
+          "attributes": {
+            "db.system": "redis",
+            "db.statement": "GET appConfig",
+            "_result": "MISS"
+          }
+        },
+        {
+          "spanId": "42c390dd2ed235fa",
+          "parentSpanId": "20a178bb0cb013d8",
+          "operationName": "prisma:query AppConfig.findMany",
+          "kind": "CLIENT",
+          "startTime": "2026-04-13T09:30:11.012Z",
+          "endTime": "2026-04-13T09:30:11.742Z",
+          "durationMs": 730,
+          "status": "ERROR",
+          "attributes": {
+            "db.system": "mssql",
+            "db.operation": "findMany",
+            "error": true,
+            "exception.type": "PrismaClientKnownRequestError",
+            "exception.message": "Can't reach database server"
+          }
+        }
+      ],
+      "_note": "Erreur SQL après timeout (730ms). La trace montre exactement où la requête a échoué."
+    }
+  ]
+}

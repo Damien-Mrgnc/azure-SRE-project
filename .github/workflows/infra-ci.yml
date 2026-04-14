@@ -1,10 +1,12 @@
-name: Infra CI
+# InfraCI workflow
 
+name: Infra CI
 on:
   push:
     branches: 
       - main
-      - 'feat/**' 
+      - feat/**
+      - 'phase-**'
     paths:
       - 'terraform/**'
       - '.github/workflows/infra-ci.yml'
@@ -116,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform-plan
     environment: production
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/phase-') || startsWith(github.ref, 'refs/heads/feat/')) && github.event_name == 'push'
     permissions:
       contents: read
       id-token: write
@@ -143,6 +145,42 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
         run: terraform init
+
+      # ---------------------------------------------------------------
+      # Fix permanent : importer les secrets KV s'ils existent déjà dans Azure
+      # mais pas dans l'état Terraform (évite l'erreur "already exists").
+      # Utilise Azure CLI pour trouver le KV (plus fiable que terraform output).
+      # ---------------------------------------------------------------
+      - name: Import existing Key Vault secrets (idempotent)
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_USE_OIDC: true
+        run: |
+          set -x  # Mode debug : affiche chaque commande dans les logs
+
+          # Azure CLI : cherche le KV dans le subscription (ne dépend pas du state Terraform)
+          KV_NAME=$(az keyvault list \
+            --query "[?starts_with(name, 'kv-projet1')].name | [0]" \
+            -o tsv 2>/dev/null || true)
+
+          echo ">>> Key Vault détecté : '${KV_NAME}'"
+
+          if [ -n "$KV_NAME" ]; then
+            BASE_URL="https://${KV_NAME}.vault.azure.net/secrets"
+            echo ">>> Import des secrets depuis : $BASE_URL"
+
+            terraform import azurerm_key_vault_secret.sql_password           "${BASE_URL}/sql-admin-password"        2>&1 || true
+            terraform import azurerm_key_vault_secret.sql_connection_string   "${BASE_URL}/sql-connection-string"    2>&1 || true
+            terraform import azurerm_key_vault_secret.redis_connection_string  "${BASE_URL}/redis-connection-string" 2>&1 || true
+            terraform import azurerm_key_vault_secret.grafana_admin_password   "${BASE_URL}/grafana-admin-password"  2>&1 || true
+
+            echo ">>> Import terminé (les 'already exists' ci-dessus sont normaux si déjà en state)"
+          else
+            echo ">>> Aucun KV trouvé — premier déploiement, import ignoré."
+          fi
+
       - name: Terraform Apply
         env:
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -150,3 +188,4 @@ jobs:
           ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           ARM_USE_OIDC: true
         run: terraform apply -auto-approve -lock=false
+

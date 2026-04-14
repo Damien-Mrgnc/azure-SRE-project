@@ -1,0 +1,674 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 60,
+    "links": [],
+    "panels": [
+        {
+            "fieldConfig": {
+                "defaults": {},
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "code": {
+                    "language": "plaintext",
+                    "showLineNumbers": false,
+                    "showMiniMap": false
+                },
+                "content": "# Bienvenue sur le Dashboard SRE",
+                "mode": "markdown"
+            },
+            "pluginVersion": "11.6.9",
+            "title": "SRE Welcome Panel",
+            "type": "text"
+        },
+        {
+            "datasource": {
+                "type": "grafana-azure-monitor-datasource",
+                "uid": "azure-monitor-oob"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "decbytes"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 6
+            },
+            "id": 6,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "11.6.9",
+            "targets": [
+                {
+                    "azureMonitor": {
+                        "aggregation": "Average",
+                        "allowedTimeGrainsMs": [
+                            60000,
+                            300000,
+                            900000,
+                            1800000,
+                            3600000,
+                            21600000,
+                            43200000,
+                            86400000
+                        ],
+                        "dimensionFilters": [],
+                        "metricName": "MemoryWorkingSet",
+                        "metricNamespace": "microsoft.web/sites",
+                        "region": "francecentral",
+                        "resources": [
+                            {
+                                "metricNamespace": "Microsoft.Web/sites",
+                                "region": "francecentral",
+                                "resourceGroup": "rg-projet1-lab",
+                                "resourceName": "app-projet1-55906d7d9b",
+                                "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                            }
+                        ],
+                        "timeGrain": "auto"
+                    },
+                    "queryType": "Azure Monitor",
+                    "refId": "A",
+                    "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                }
+            ],
+            "title": "Utilisation Mémoire",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-azure-monitor-datasource",
+                "uid": "azure-monitor-oob"
+            },
+            "description": "",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 6
+            },
+            "id": 2,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "11.6.9",
+            "targets": [
+                {
+                    "azureMonitor": {
+                        "aggregation": "Total",
+                        "allowedTimeGrainsMs": [
+                            60000,
+                            300000,
+                            900000,
+                            1800000,
+                            3600000,
+                            21600000,
+                            43200000,
+                            86400000
+                        ],
+                        "dimensionFilters": [],
+                        "metricName": "Requests",
+                        "metricNamespace": "microsoft.web/sites",
+                        "region": "francecentral",
+                        "resources": [
+                            {
+                                "metricNamespace": "Microsoft.Web/sites",
+                                "region": "francecentral",
+                                "resourceGroup": "rg-projet1-lab",
+                                "resourceName": "app-projet1-55906d7d9b",
+                                "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                            }
+                        ],
+                        "timeGrain": "auto"
+                    },
+                    "queryType": "Azure Monitor",
+                    "refId": "A",
+                    "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                }
+            ],
+            "title": "Total Traffic (Requêtes)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-azure-monitor-datasource",
+                "uid": "azure-monitor-oob"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 14
+            },
+            "id": 5,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "11.6.9",
+            "targets": [
+                {
+                    "azureMonitor": {
+                        "aggregation": "Total",
+                        "allowedTimeGrainsMs": [
+                            60000,
+                            300000,
+                            900000,
+                            1800000,
+                            3600000,
+                            21600000,
+                            43200000,
+                            86400000
+                        ],
+                        "dimensionFilters": [],
+                        "metricName": "CpuTime",
+                        "metricNamespace": "microsoft.web/sites",
+                        "region": "francecentral",
+                        "resources": [
+                            {
+                                "metricNamespace": "Microsoft.Web/sites",
+                                "region": "francecentral",
+                                "resourceGroup": "rg-projet1-lab",
+                                "resourceName": "app-projet1-55906d7d9b",
+                                "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                            }
+                        ],
+                        "timeGrain": "auto"
+                    },
+                    "queryType": "Azure Monitor",
+                    "refId": "A",
+                    "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                }
+            ],
+            "title": "Saturation CPU",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-azure-monitor-datasource",
+                "uid": "azure-monitor-oob"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "decimals": 1,
+                    "fieldMinMax": false,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 14
+            },
+            "id": 3,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "11.6.9",
+            "targets": [
+                {
+                    "azureMonitor": {
+                        "aggregation": "Total",
+                        "allowedTimeGrainsMs": [
+                            60000,
+                            300000,
+                            900000,
+                            1800000,
+                            3600000,
+                            21600000,
+                            43200000,
+                            86400000
+                        ],
+                        "dimensionFilters": [],
+                        "metricName": "Http4xx",
+                        "metricNamespace": "microsoft.web/sites",
+                        "region": "francecentral",
+                        "resources": [
+                            {
+                                "metricNamespace": "Microsoft.Web/sites",
+                                "region": "francecentral",
+                                "resourceGroup": "rg-projet1-lab",
+                                "resourceName": "app-projet1-55906d7d9b",
+                                "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                            }
+                        ],
+                        "timeGrain": "auto"
+                    },
+                    "queryType": "Azure Monitor",
+                    "refId": "A",
+                    "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                }
+            ],
+            "title": "Erreurs Client (400)",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-azure-monitor-datasource",
+                "uid": "azure-monitor-oob"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 22
+            },
+            "id": 4,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "11.6.9",
+            "targets": [
+                {
+                    "azureMonitor": {
+                        "aggregation": "Average",
+                        "allowedTimeGrainsMs": [],
+                        "dimensionFilters": [],
+                        "metricName": "Average Response Time",
+                        "metricNamespace": "microsoft.web/sites",
+                        "region": "francecentral",
+                        "resources": [
+                            {
+                                "metricNamespace": "Microsoft.Web/sites",
+                                "region": "francecentral",
+                                "resourceGroup": "rg-projet1-lab",
+                                "resourceName": "app-projet1-55906d7d9b",
+                                "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                            }
+                        ],
+                        "timeGrain": "auto"
+                    },
+                    "queryType": "Azure Monitor",
+                    "refId": "A",
+                    "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                }
+            ],
+            "title": "Temps de Réponse Moyen",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-azure-monitor-datasource",
+                "uid": "azure-monitor-oob"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green"
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 22
+            },
+            "id": 7,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "11.6.9",
+            "targets": [
+                {
+                    "azureMonitor": {
+                        "aggregation": "Total",
+                        "allowedTimeGrainsMs": [
+                            60000,
+                            300000,
+                            900000,
+                            1800000,
+                            3600000,
+                            21600000,
+                            43200000,
+                            86400000
+                        ],
+                        "customNamespace": "Microsoft.Web/sites",
+                        "dimensionFilters": [],
+                        "metricName": "Http 5xx",
+                        "metricNamespace": "microsoft.web/sites",
+                        "region": "francecentral",
+                        "resources": [
+                            {
+                                "metricNamespace": "Microsoft.Web/sites",
+                                "region": "francecentral",
+                                "resourceGroup": "rg-projet1-lab",
+                                "resourceName": "app-projet1-55906d7d9b",
+                                "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                            }
+                        ],
+                        "timeGrain": "auto"
+                    },
+                    "queryType": "Azure Monitor",
+                    "refId": "A",
+                    "subscription": "0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2"
+                }
+            ],
+            "title": "Erreurs Serveur (500)",
+            "type": "timeseries"
+        }
+    ],
+    "preload": false,
+    "refresh": "auto",
+    "schemaVersion": 41,
+    "tags": [],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "2026-02-24T17:07:57.896Z",
+        "to": "2026-03-04T20:11:53.147Z"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Application Health (SRE)",
+    "uid": "aff11bfa8nfuod",
+    "version": 13
+}
