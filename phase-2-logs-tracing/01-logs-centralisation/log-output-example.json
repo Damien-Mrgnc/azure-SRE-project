@@ -1,0 +1,61 @@
+{
+  "_comment": "Exemple de résultats d'une requête KQL sur Log Analytics Workspace.",
+  "_query": "AppServiceConsoleLogs | where TimeGenerated > ago(1h) | order by TimeGenerated desc | take 20",
+  "_timestamp": "2026-04-13T10:00:00Z",
+  "results": [
+    {
+      "TimeGenerated": "2026-04-13T09:58:42.123Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Response Sent\",\"service\":\"runtime-governance-app\",\"method\":\"GET\",\"url\":\"/api/config\",\"statusCode\":200,\"correlationId\":\"c4f2a891-3b1d-4e7f-9a23-7d8e1f2b3c4a\",\"timestamp\":\"2026-04-13T09:58:42.120Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:58:42.098Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Incoming Request\",\"service\":\"runtime-governance-app\",\"method\":\"GET\",\"url\":\"/api/config\",\"correlationId\":\"c4f2a891-3b1d-4e7f-9a23-7d8e1f2b3c4a\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\",\"ip\":\"90.50.12.34\",\"timestamp\":\"2026-04-13T09:58:42.095Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:57:11.301Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Config retrieved from Redis cache\",\"service\":\"runtime-governance-app\",\"timestamp\":\"2026-04-13T09:57:11.299Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:55:03.882Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Updating config by admin\",\"service\":\"runtime-governance-app\",\"newConfig\":{\"theme\":\"dark\",\"maintenanceMode\":false},\"correlationId\":\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\"timestamp\":\"2026-04-13T09:55:03.880Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:55:03.921Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Configuration updated successfully (2 keys changed)\",\"service\":\"runtime-governance-app\",\"correlationId\":\"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\"timestamp\":\"2026-04-13T09:55:03.919Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:55:04.015Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Cache invalidated after config update\",\"service\":\"runtime-governance-app\",\"timestamp\":\"2026-04-13T09:55:04.013Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:52:18.444Z",
+      "Level": "Warning",
+      "ResultDescription": "{\"level\":\"warn\",\"message\":\"Failed to fetch quote of the day\",\"service\":\"runtime-governance-app\",\"timestamp\":\"2026-04-13T09:52:18.441Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    },
+    {
+      "TimeGenerated": "2026-04-13T09:40:00.001Z",
+      "Level": "Informational",
+      "ResultDescription": "{\"level\":\"info\",\"message\":\"Runtime Governance App listening on port 8080\",\"service\":\"runtime-governance-app\",\"timestamp\":\"2026-04-13T09:40:00.000Z\"}",
+      "OperationName": "Microsoft.Web/sites/log"
+    }
+  ],
+  "_kql_examples": {
+    "error_rate": "AppServiceConsoleLogs | where ResultDescription has '\"level\":\"error\"' | summarize count() by bin(TimeGenerated, 5m)",
+    "slow_requests": "AppServiceHTTPLogs | where TimeTaken > 500 | project TimeGenerated, CsUriStem, TimeTaken, ScStatus",
+    "correlation_trace": "AppServiceConsoleLogs | where ResultDescription has 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' | order by TimeGenerated asc",
+    "http5xx": "AppServiceHTTPLogs | where ScStatus >= 500 | summarize count() by bin(TimeGenerated, 1m), ScStatus"
+  }
+}
