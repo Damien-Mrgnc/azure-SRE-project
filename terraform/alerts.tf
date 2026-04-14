@@ -61,6 +61,99 @@ resource "azurerm_monitor_metric_alert" "app_http_5xx" {
   tags = local.tags
 }
 
+# ---
+# Phase 4 — Alertes SLO
+# ---
+
+# SLO Disponibilité : alerte si HTTP 5xx > 1% du trafic sur 5 min (Log Analytics query)
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "slo_availability" {
+  name                = "slo-availability-breach"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  description         = "SLO Breach: HTTP 5xx error rate exceeded 1% — availability SLO at risk."
+  severity            = 1 # 0=Critical, 1=Error, 2=Warning
+
+  scopes = [azurerm_log_analytics_workspace.main.id]
+
+  evaluation_frequency = "PT5M"  # Évaluer toutes les 5 min
+  window_duration      = "PT5M"  # Fenêtre d'analyse de 5 min
+
+  criteria {
+    query = <<-EOT
+      AppServiceHTTPLogs
+      | where TimeGenerated > ago(5m)
+      | summarize total = count(), errors5xx = countif(ScStatus >= 500)
+      | extend error_rate_pct = (toreal(errors5xx) / toreal(total)) * 100
+      | where error_rate_pct > 1.0
+    EOT
+
+    time_aggregation_method = "Count"
+    threshold               = 0
+    operator                = "GreaterThan"
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 1
+    }
+  }
+
+  action {
+    action_groups = [azurerm_monitor_action_group.main.id]
+    custom_properties = {
+      slo       = "Availability"
+      threshold = "99.9%"
+    }
+  }
+
+  tags = local.tags
+}
+
+# SLO Latence : alerte si temps de réponse moyen > 800ms sur 10 min
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "slo_latency" {
+  name                = "slo-latency-breach"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  description         = "SLO Breach: Average response time exceeded 800ms — latency SLO at risk."
+  severity            = 2 # Warning
+
+  scopes = [azurerm_log_analytics_workspace.main.id]
+
+  evaluation_frequency = "PT5M"
+  window_duration      = "PT10M"
+
+  criteria {
+    query = <<-EOT
+      AppServiceHTTPLogs
+      | where TimeGenerated > ago(10m)
+      | summarize p99 = percentile(TimeTaken, 99)
+      | where p99 > 800
+    EOT
+
+    time_aggregation_method = "Count"
+    threshold               = 0
+    operator                = "GreaterThan"
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 2
+    }
+  }
+
+  action {
+    action_groups = [azurerm_monitor_action_group.main.id]
+    custom_properties = {
+      slo       = "Latency"
+      threshold = "p99 < 1000ms"
+    }
+  }
+
+  tags = local.tags
+}
+
+# ---
+# Alertes infrastructure existantes (Phase 1)
+# ---
+
 # 4. SQL Database - Low Storage Space
 resource "azurerm_monitor_metric_alert" "sql_storage" {
   name                = "alert-sql-storage-low"

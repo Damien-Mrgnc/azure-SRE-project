@@ -27,11 +27,22 @@ Le provider `azurerm` a été mis à jour de `~> 3.90.0` à `~> 4.0` pour suppor
 - Enregistrement du resource provider `Microsoft.Dashboard` sur la souscription.
 - Attribution du rôle `Role Based Access Control Administrator` au Service Principal CI.
 
-## Fichiers Clés
-- `terraform/monitoring.tf` — Définition complète de la stack monitoring (Log Analytics, App Insights, Monitor Workspace, Grafana, RBAC).
-- `terraform/providers.tf` — Mise à jour du provider azurerm (`~> 4.0`).
-- `terraform/compute.tf` — Corrections de compatibilité App Service.
-- `terraform/redis.tf` — Correction de la dépréciation Redis.
+## Fichiers Clés (Snapshot Phase 1)
+
+| Fichier | Description |
+|---|---|
+| [`monitoring.tf`](./monitoring.tf) | Snapshot — Stack monitoring : Log Analytics, App Insights, Grafana, déploiement dashboard |
+| [`alerts.tf`](./alerts.tf) | Snapshot — Alertes Azure Monitor : CPU, HTTP 5xx, stockage SQL |
+
+> Les fichiers source en production se trouvent dans [`terraform/monitoring.tf`](../../../terraform/monitoring.tf) et [`terraform/alerts.tf`](../../../terraform/alerts.tf).
+
+### Alertes configurées (`alerts.tf`)
+
+| Alerte | Ressource ciblée | Condition | Notification |
+|---|---|---|---|
+| `alert-asp-cpu-high` | App Service Plan | CPU > 80% (moyenne) | Email via Action Group |
+| `alert-webapp-5xx` | Web App | HTTP 5xx > 5 (total) | Email via Action Group |
+| `alert-sql-storage-low` | SQL Database | Stockage > 90% (moyenne) | Email via Action Group |
 
 ## Résultat
-L'infrastructure d'observabilité est entièrement déployée et gérée par Terraform. Grafana dispose des permissions nécessaires pour lire toutes les données Azure Monitor du Resource Group. La CI/CD peut gérer les dashboards de manière autonome.
+L'infrastructure d'observabilité est entièrement définie en Terraform. Grafana est déployé sur App Service avec le plugin Azure Monitor pré-installé. Les alertes couvrent les incidents critiques (saturation CPU, indisponibilité service, stockage saturé).

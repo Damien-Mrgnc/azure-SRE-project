@@ -1,6 +1,3 @@
-// OpenTelemetry MUST be initialized first, before any other import
-require('./config/tracing');
-
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -47,7 +44,7 @@ app.use(responseTime((req, res, time) => {
     if (req?.route?.path === '/metrics') return;
 
     const route = req.route ? req.route.path : req.path;
-    
+
     reqResTime.labels(req.method, route, res.statusCode).observe(time);
     requestsTotal.labels(req.method, route, res.statusCode).inc();
 }));

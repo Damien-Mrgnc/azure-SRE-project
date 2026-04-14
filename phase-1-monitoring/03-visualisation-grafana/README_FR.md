@@ -33,9 +33,37 @@ az grafana dashboard create \
   --overwrite true
 ```
 
-## Fichiers Clés
-- `terraform/dashboards/webapp-health.json` — Définition JSON complète du dashboard (4 Golden Signals).
-- `terraform/monitoring.tf` — Ressource `null_resource` pour le déploiement idempotent du dashboard.
+## Fichiers Clés (Snapshot Phase 1)
+
+| Fichier | Description |
+|---|---|
+| [`dashboards/webapp-health.json`](./dashboards/webapp-health.json) | Snapshot — Définition JSON complète du dashboard (4 Golden Signals) |
+
+> Le fichier source en production se trouve dans [`terraform/dashboards/webapp-health.json`](../../../terraform/dashboards/webapp-health.json).
+> Le provisionnement Terraform est dans [`02-infra-monitoring/monitoring.tf`](../02-infra-monitoring/monitoring.tf) (`null_resource.grafana_dashboard_webapp`).
+
+### Panneaux du Dashboard
+
+| Panneau | Type | Signal | Métrique Azure Monitor |
+|---|---|---|---|
+| Total Traffic (Requêtes) | Time Series | Trafic | `Requests` |
+| Erreurs Client (400) | Stat | Erreurs | `Http4xx` |
+| Erreurs Serveur (500) | Time Series | Erreurs | `Http 5xx` |
+| Temps de Réponse Moyen | Time Series | Latence | `Average Response Time` |
+| Saturation CPU | Gauge | Saturation | `CpuTime` |
+| Utilisation Mémoire | Gauge | Saturation | `MemoryWorkingSet` |
+
+### Déploiement via API REST Grafana
+
+Le dashboard est poussé automatiquement via l'API REST de Grafana après que Terraform ait démarré le conteneur :
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -u "admin:<password>" \
+  -d '{"dashboard": <json>, "overwrite": true, "folderId": 0}' \
+  https://<grafana-host>/api/dashboards/db
+```
 
 ## Résultat
-Le dashboard est versionné avec le code, déployé automatiquement sur chaque `terraform apply`, et ne génère aucune action si le fichier JSON n'a pas changé. L'équipe SRE dispose d'une vue unifiée des 4 Golden Signals dès le déploiement.
+Le dashboard est versionné avec le code et déployé automatiquement. L'équipe SRE dispose d'une vue unifiée des 4 Golden Signals dès le premier déploiement.

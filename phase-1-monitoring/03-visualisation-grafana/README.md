@@ -33,9 +33,37 @@ az grafana dashboard create \
   --overwrite true
 ```
 
-## Key Files
-- `terraform/dashboards/webapp-health.json` — Full JSON dashboard definition (4 Golden Signals).
-- `terraform/monitoring.tf` — `null_resource` for idempotent dashboard deployment.
+## Key Files (Phase 1 Snapshot)
+
+| File | Description |
+|---|---|
+| [`dashboards/webapp-health.json`](./dashboards/webapp-health.json) | Snapshot — Full JSON dashboard definition (4 Golden Signals) |
+
+> Live source file is at [`terraform/dashboards/webapp-health.json`](../../../terraform/dashboards/webapp-health.json).
+> Terraform provisioning is in [`02-infra-monitoring/monitoring.tf`](../02-infra-monitoring/monitoring.tf) (`null_resource.grafana_dashboard_webapp`).
+
+### Dashboard Panels
+
+| Panel | Type | Signal | Azure Monitor Metric |
+|---|---|---|---|
+| Total Traffic (Requests) | Time Series | Traffic | `Requests` |
+| Client Errors (400) | Stat | Errors | `Http4xx` |
+| Server Errors (500) | Time Series | Errors | `Http 5xx` |
+| Average Response Time | Time Series | Latency | `Average Response Time` |
+| CPU Saturation | Gauge | Saturation | `CpuTime` |
+| Memory Usage | Gauge | Saturation | `MemoryWorkingSet` |
+
+### Deployment via Grafana REST API
+
+The dashboard is pushed automatically via Grafana's REST API after Terraform starts the container:
+
+```bash
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -u "admin:<password>" \
+  -d '{"dashboard": <json>, "overwrite": true, "folderId": 0}' \
+  https://<grafana-host>/api/dashboards/db
+```
 
 ## Result
-The dashboard is versioned with the code, automatically deployed on each `terraform apply`, and takes no action if the JSON file hasn't changed. The SRE team gets a unified view of all 4 Golden Signals from the very first deployment.
+The dashboard is versioned with the code and deployed automatically. The SRE team has a unified view of all 4 Golden Signals from the very first deployment.

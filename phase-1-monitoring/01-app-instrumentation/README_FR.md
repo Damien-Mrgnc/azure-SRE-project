@@ -19,8 +19,31 @@ Le middleware `response-time` intercepte toutes les requêtes et alimente les m�
 - **Format** : `text/plain` au format Prometheus (compatible scraping).
 - **Accès** : Public (non protégé par l'auth) pour permettre le scraping par les collecteurs.
 
-## Fichiers Clés
-- `app/src/server.js` — Instrumentation Prometheus, déclaration des métriques, middleware et endpoint `/metrics`.
+## Fichiers Clés (Snapshot Phase 1)
+
+| Fichier | Description |
+|---|---|
+| [`server.js`](./server.js) | Snapshot du code source instrumenté |
+| [`metrics-output-example.txt`](./metrics-output-example.txt) | Sortie simulée de l'endpoint `/metrics` en production |
+
+> Les fichiers source en production se trouvent dans [`app/src/server.js`](../../../app/src/server.js).
+
+## Exemple de sortie `/metrics`
+
+Extrait des métriques custom (voir [`metrics-output-example.txt`](./metrics-output-example.txt) pour la sortie complète) :
+
+```
+# HELP http_request_duration_ms Duration of HTTP requests in ms
+# TYPE http_request_duration_ms histogram
+http_request_duration_ms_bucket{le="10",method="GET",route="/",code="200"} 45
+http_request_duration_ms_bucket{le="50",method="GET",route="/",code="200"} 88
+http_request_duration_ms_count{method="GET",route="/",code="200"} 100
+
+# HELP http_requests_total Total number of HTTP requests
+# TYPE http_requests_total counter
+http_requests_total{method="GET",route="/",code="200"} 100
+http_requests_total{method="GET",route="/api/config",code="401"} 5
+```
 
 ## Résultat
-L'application expose désormais un endpoint `/metrics` complet, prêt à être consommé par Azure Monitor, Prometheus ou tout collecteur compatible. Les 4 Golden Signals sont couverts côté applicatif.
+L'application expose un endpoint `/metrics` complet au format Prometheus, prêt à être consommé par Azure Monitor ou tout collecteur compatible. Les 4 Golden Signals sont couverts côté applicatif.
