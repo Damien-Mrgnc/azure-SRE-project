@@ -1,0 +1,119 @@
+{
+  "_meta": {
+    "description": "Timeline des métriques Azure Monitor pendant les 2 expériences de chaos (2026-04-13)",
+    "resolution": "1 minute",
+    "source": "Azure Monitor — App Service Plan + Web App metrics",
+    "chaos_exp1_window": "10:00 → 10:10",
+    "chaos_exp2_window": "10:13 → 10:16"
+  },
+
+  "cpu_percentage": {
+    "metric": "CpuPercentage",
+    "resource": "asp-projet3-sre-lab (App Service Plan)",
+    "unit": "%",
+    "timeline": [
+      { "time": "09:55", "value": 8,  "instances": 1, "note": "Baseline — trafic normal" },
+      { "time": "09:56", "value": 9,  "instances": 1 },
+      { "time": "09:57", "value": 7,  "instances": 1 },
+      { "time": "09:58", "value": 10, "instances": 1 },
+      { "time": "09:59", "value": 11, "instances": 1 },
+      { "time": "10:00", "value": 34, "instances": 1, "note": "CHAOS EXP 1 START — CPU stress lancé" },
+      { "time": "10:01", "value": 61, "instances": 1 },
+      { "time": "10:02", "value": 74, "instances": 1 },
+      { "time": "10:03", "value": 76, "instances": 1, "note": "slo-latency-breach fired (p99 > 800ms)" },
+      { "time": "10:04", "value": 79, "instances": 1 },
+      { "time": "10:05", "value": 82, "instances": 2, "note": "SCALE-OUT → 2 instances | alert-asp-cpu-high fired" },
+      { "time": "10:06", "value": 81, "instances": 3, "note": "SCALE-OUT → 3 instances" },
+      { "time": "10:07", "value": 68, "instances": 3, "note": "CPU retombe grâce aux 3 instances" },
+      { "time": "10:08", "value": 58, "instances": 3 },
+      { "time": "10:09", "value": 52, "instances": 3 },
+      { "time": "10:10", "value": 21, "instances": 3, "note": "CHAOS EXP 1 END — stress arrêté" },
+      { "time": "10:11", "value": 14, "instances": 3, "note": "Alertes résolues" },
+      { "time": "10:12", "value": 12, "instances": 3 },
+      { "time": "10:13", "value": 9,  "instances": 1, "note": "CHAOS EXP 2 START — az webapp restart" },
+      { "time": "10:14", "value": 45, "instances": 1, "note": "Redémarrage — pic CPU au démarrage" },
+      { "time": "10:15", "value": 18, "instances": 1, "note": "Service rétabli (T+94s)" },
+      { "time": "10:16", "value": 11, "instances": 1, "note": "CHAOS EXP 2 END" },
+      { "time": "10:17", "value": 9,  "instances": 1 },
+      { "time": "10:18", "value": 8,  "instances": 1 }
+    ]
+  },
+
+  "http_requests_total_per_minute": {
+    "metric": "Requests",
+    "resource": "app-projet3-sre-abc123 (Web App)",
+    "unit": "count/min",
+    "timeline": [
+      { "time": "09:55", "requests": 142, "http_2xx": 139, "http_4xx": 3, "http_5xx": 0 },
+      { "time": "09:56", "requests": 138, "http_2xx": 136, "http_4xx": 2, "http_5xx": 0 },
+      { "time": "09:57", "requests": 145, "http_2xx": 143, "http_4xx": 2, "http_5xx": 0 },
+      { "time": "09:58", "requests": 141, "http_2xx": 140, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "09:59", "requests": 139, "http_2xx": 137, "http_4xx": 2, "http_5xx": 0 },
+      { "time": "10:00", "requests": 312, "http_2xx": 310, "http_4xx": 2, "http_5xx": 0,  "note": "Montée en charge stress" },
+      { "time": "10:01", "requests": 498, "http_2xx": 495, "http_4xx": 3, "http_5xx": 0 },
+      { "time": "10:02", "requests": 521, "http_2xx": 518, "http_4xx": 2, "http_5xx": 1 },
+      { "time": "10:03", "requests": 534, "http_2xx": 529, "http_4xx": 4, "http_5xx": 1 },
+      { "time": "10:04", "requests": 518, "http_2xx": 512, "http_4xx": 3, "http_5xx": 3 },
+      { "time": "10:05", "requests": 489, "http_2xx": 483, "http_4xx": 4, "http_5xx": 2,  "note": "Scale-out → qualité s'améliore" },
+      { "time": "10:06", "requests": 502, "http_2xx": 500, "http_4xx": 2, "http_5xx": 0 },
+      { "time": "10:07", "requests": 498, "http_2xx": 497, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:08", "requests": 501, "http_2xx": 500, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:09", "requests": 495, "http_2xx": 494, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:10", "requests": 210, "http_2xx": 208, "http_4xx": 2, "http_5xx": 0,  "note": "Fin du chaos — charge retombe" },
+      { "time": "10:11", "requests": 148, "http_2xx": 147, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:12", "requests": 141, "http_2xx": 141, "http_4xx": 0, "http_5xx": 0 },
+      { "time": "10:13", "requests": 98,  "http_2xx": 71,  "http_4xx": 0, "http_5xx": 8,  "note": "KILL — downtime 94s, 8 erreurs 5xx" },
+      { "time": "10:14", "requests": 134, "http_2xx": 133, "http_4xx": 1, "http_5xx": 0,  "note": "Service rétabli T+94s" },
+      { "time": "10:15", "requests": 141, "http_2xx": 140, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:16", "requests": 143, "http_2xx": 142, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:17", "requests": 139, "http_2xx": 138, "http_4xx": 1, "http_5xx": 0 },
+      { "time": "10:18", "requests": 142, "http_2xx": 141, "http_4xx": 1, "http_5xx": 0 }
+    ]
+  },
+
+  "response_time_ms": {
+    "metric": "AverageResponseTime + percentiles via App Insights",
+    "unit": "ms",
+    "timeline": [
+      { "time": "09:55", "avg": 68,   "p50": 42,   "p95": 145,  "p99": 210  },
+      { "time": "09:56", "avg": 72,   "p50": 45,   "p95": 148,  "p99": 215  },
+      { "time": "09:57", "avg": 65,   "p50": 40,   "p95": 140,  "p99": 205  },
+      { "time": "09:58", "avg": 70,   "p50": 44,   "p95": 145,  "p99": 212  },
+      { "time": "09:59", "avg": 69,   "p50": 43,   "p95": 143,  "p99": 208  },
+      { "time": "10:00", "avg": 312,  "p50": 245,  "p95": 780,  "p99": 1240, "note": "Chaos start — latence monte" },
+      { "time": "10:01", "avg": 890,  "p50": 780,  "p95": 1820, "p99": 2100 },
+      { "time": "10:02", "avg": 1240, "p50": 1100, "p95": 2080, "p99": 2280 },
+      { "time": "10:03", "avg": 1380, "p50": 1250, "p95": 2150, "p99": 2318, "note": "slo-latency-breach fired" },
+      { "time": "10:04", "avg": 1420, "p50": 1290, "p95": 2180, "p99": 2318 },
+      { "time": "10:05", "avg": 1210, "p50": 1080, "p95": 2050, "p99": 2241, "note": "Scale-out → légère amélioration" },
+      { "time": "10:06", "avg": 980,  "p50": 850,  "p95": 1950, "p99": 2180 },
+      { "time": "10:07", "avg": 720,  "p50": 620,  "p95": 1650, "p99": 2010 },
+      { "time": "10:08", "avg": 580,  "p50": 480,  "p95": 1380, "p99": 1820 },
+      { "time": "10:09", "avg": 450,  "p50": 360,  "p95": 980,  "p99": 1450 },
+      { "time": "10:10", "avg": 180,  "p50": 120,  "p95": 410,  "p99": 680,  "note": "Chaos stop — retour à la normale" },
+      { "time": "10:11", "avg": 98,   "p50": 65,   "p95": 210,  "p99": 380  },
+      { "time": "10:12", "avg": 72,   "p50": 48,   "p95": 155,  "p99": 225  },
+      { "time": "10:13", "avg": 4820, "p50": 5000, "p95": 5000, "p99": 5000, "note": "Kill — timeout 5s pour les requêtes en cours" },
+      { "time": "10:14", "avg": 145,  "p50": 95,   "p95": 380,  "p99": 620,  "note": "Retour à la normale post-restart" },
+      { "time": "10:15", "avg": 78,   "p50": 52,   "p95": 168,  "p99": 245  },
+      { "time": "10:16", "avg": 71,   "p50": 47,   "p95": 152,  "p99": 228  },
+      { "time": "10:17", "avg": 68,   "p50": 44,   "p95": 146,  "p99": 215  },
+      { "time": "10:18", "avg": 70,   "p50": 45,   "p95": 148,  "p99": 218  }
+    ]
+  },
+
+  "memory_working_set_bytes": {
+    "metric": "MemoryWorkingSet",
+    "resource": "app-projet3-sre-abc123",
+    "unit": "MB",
+    "timeline": [
+      { "time": "09:55", "value_mb": 245 },
+      { "time": "10:00", "value_mb": 312, "note": "Montée avec le trafic" },
+      { "time": "10:05", "value_mb": 387 },
+      { "time": "10:10", "value_mb": 298, "note": "Redescend après chaos" },
+      { "time": "10:13", "value_mb": 50,  "note": "Restart — mémoire libérée" },
+      { "time": "10:14", "value_mb": 210, "note": "Warm-up post-restart" },
+      { "time": "10:18", "value_mb": 248 }
+    ]
+  }
+}

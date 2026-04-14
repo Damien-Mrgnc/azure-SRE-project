@@ -1,0 +1,112 @@
+{
+  "_comment": "Azure Chaos Studio — Experiment Definition. À déployer via az CLI ou le portail Azure.",
+  "_deploy_command": "az rest --method PUT --url '/subscriptions/{subscriptionId}/resourceGroups/rg-projet3-sre/providers/Microsoft.Chaos/experiments/chaos-exp-sre-full' --body @azure-chaos-experiment.json --api-version 2023-11-01",
+
+  "type": "Microsoft.Chaos/experiments",
+  "name": "chaos-exp-sre-full",
+  "location": "francecentral",
+  "identity": {
+    "type": "SystemAssigned"
+  },
+  "properties": {
+    "selectors": [
+      {
+        "id": "selector-app-service",
+        "type": "List",
+        "targets": [
+          {
+            "id": "/subscriptions/0f3b6c74-e6a7-46dd-bf2f-079c4568c1c2/resourceGroups/rg-projet3-sre/providers/Microsoft.Web/sites/app-projet3-sre-abc123/providers/Microsoft.Chaos/targets/Microsoft-AppService",
+            "type": "ChaosTarget"
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "name": "Step 1 - Baseline",
+        "branches": [
+          {
+            "name": "Wait-Baseline",
+            "actions": [
+              {
+                "name": "wait-2-minutes",
+                "type": "delay",
+                "duration": "PT2M"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Step 2 - CPU Pressure",
+        "branches": [
+          {
+            "name": "CPU-Stress-Branch",
+            "actions": [
+              {
+                "name": "cpu-pressure-80pct",
+                "type": "continuous",
+                "selectorId": "selector-app-service",
+                "duration": "PT5M",
+                "parameters": [
+                  {
+                    "key": "pressureLevel",
+                    "value": "80"
+                  }
+                ],
+                "urn": "urn:csci:microsoft:appService:cpuPressure/1.0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Step 3 - Recovery Check",
+        "branches": [
+          {
+            "name": "Wait-Recovery",
+            "actions": [
+              {
+                "name": "wait-recovery-5-minutes",
+                "type": "delay",
+                "duration": "PT5M"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Step 4 - Stop & Restart",
+        "branches": [
+          {
+            "name": "Stop-Branch",
+            "actions": [
+              {
+                "name": "stop-app-service",
+                "type": "discrete",
+                "selectorId": "selector-app-service",
+                "parameters": [],
+                "urn": "urn:csci:microsoft:appService:stop/1.0"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Step 5 - Auto-recovery Observation",
+        "branches": [
+          {
+            "name": "Observe-Recovery",
+            "actions": [
+              {
+                "name": "wait-auto-restart",
+                "type": "delay",
+                "duration": "PT3M"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
